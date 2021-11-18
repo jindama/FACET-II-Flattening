@@ -17,9 +17,13 @@ if(loadin == 2) pp("Transverse distribution fixed by UV_BW.BMP");
 #if(loadin == 2) setphidist("beam","u",0,2*pi);
 #if(loadin == 2) setGBzdist("beam","u",GBz,1.0e-20); #For now, beam is generated at rest with zero initial energy spread
 #if(loadin == 2) setGBthetadist("beam","u",pi/4,pi/2); #Uniform phase space distribution for now
-#if(loadin == 2) setGBphidist("beam","u",0,2*pi);
-if(loadin == 2) setGBxemittance("beam",themit);
-if(loadin == 2) setGByemittance("beam",themit);
+#if(loadin == 2) setGBphidist("beam","u",0,2*pi)
+
+###################################################################
+# Fix Transverse Emittance (Scaling phase space appropriately)    #
+###################################################################
+#if(loadin == 2) setGBxemittance("beam",themit);
+#if(loadin == 2) setGByemittance("beam",themit);
 
 
 
