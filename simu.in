@@ -1,0 +1,351 @@
+######################################
+# Load in distributon from bitmap    #
+######################################
+#Try loading in first to keep the longitudinal disttribution
+if(loadin == 2) setfile( "beam", "/home/camacho/FACET_model/FACET_model/bunchData.gdf"); #
+if(loadin == 2) pp("Distribution loaded");
+if(loadin == 2) setreduce("beam", nps);
+if(loadin == 2) pp("Distribution randomly sampled to reduce to ", nps, " macroparticles.");
+
+#Now fix the transverse distribution (overwrites what we loaded in above)
+res = 775/(beamDiam);
+if(loadin == 2) setxydistbmp("beam","/home/camacho/FACET_model/FACET_model/UV_BW.BMP", res, res);
+if(loadin == 2) pp("Transverse distribution fixed by UV_BW.BMP");
+#The assignments below are not necessary if we also sample the longitudinal phase space
+#G = 1.0000000001;
+#GBz = sqrt(G^2 - 1);
+#if(loadin == 2) setphidist("beam","u",0,2*pi);
+#if(loadin == 2) setGBzdist("beam","u",GBz,1.0e-20); #For now, beam is generated at rest with zero initial energy spread
+#if(loadin == 2) setGBthetadist("beam","u",pi/4,pi/2); #Uniform phase space distribution for now
+#if(loadin == 2) setGBphidist("beam","u",0,2*pi);
+if(loadin == 2) setGBxemittance("beam",themit);
+if(loadin == 2) setGByemittance("beam",themit);
+
+
+
+
+###########################
+# Load in Distribution    #
+###########################
+#Use this to load in external distributions rather than creating them in GPT
+if(loadin == 1) m = me ;
+if(loadin == 1) q = qe;
+if(loadin == 1) setfile( "beam", "/home/ocamacho/FACET_model/FACET_model/9.866m_screen.gdf"); # 
+if(loadin == 1) pp("Distribution loaded");
+if(loadin == 1) setreduce("beam", nps);
+if(loadin == 1) pp("Distribution randomly sampled to reduce to ", nps, " macroparticles.");
+
+
+
+
+######################################
+# Generate transverse phase space    #
+######################################
+if(loadin == 0) pp("Generating particle distribution");
+if(loadin == 0) setparticles("beam",nps,me,qe,-Qtot*1e-9);
+if(loadin == 0) setrxydist("beam","u",beamDiam/2, beamDiam/2); #Uniform for now
+#if(loadin == 0) setrxydist("beam","g",0, beamDiam/2,0, 1); #1sig cut Gaussian  
+
+########################################
+# Generate Longitudinal phase space    #
+########################################
+G = 1.0000000001;
+GBz = sqrt(G^2 - 1);
+if(loadin == 0) setphidist("beam","u",0,2*pi);
+if(loadin == 0) setGBzdist("beam","u",GBz,1.0e-20); #For now, beam is generated at rest with zero initial energy spread
+if(loadin == 0) setGBthetadist("beam","u",pi/4,pi/2); #Uniform phase space distribution for now
+if(loadin == 0) setGBphidist("beam","u",0,2*pi);
+
+################
+# Emittance    #
+################ 
+#if(loadin == 0) setGBxemittance("beam",themit);
+#if(loadin == 0) setGByemittance("beam",themit);
+
+#######################
+# Longitudinal Dist   #
+#######################
+beamLen = c*tlen;
+if(loadin == 0) setzdist("beam", "u", beamLen/2, beamLen);
+
+#################################
+# Beam Release in Finite Time   #
+#################################
+t0 = 2.45e-11;
+if(loadin == 0) settdist("beam","u",0,t0); #Flat profile
+
+
+
+
+############################
+# Fix the particle count   #
+############################
+setreduce("beam", nps);
+
+
+
+
+##################
+# Spacecharge    #
+##################
+setrmacrodist("beam", "u", 2.817940e-13, 0); #Arbitrarily set to classical electron radius
+
+if(spacec==1) Spacecharge3Dmesh("Cathode"); #Include image charges behind the cathode
+if(spacec==2) setcharge2Dcircle("beam",-Qtot*1e-9) ;
+if(spacec==2) Spacecharge2Dcircle(); #Never used this but included for completeness
+if(spacec==3) setrmacrodist("beam","u", 2.82e-15,0);# Classical electron radius
+if(spacec==3) Spacecharge3Dtree(theta); #Barnes-Hut grouping algorithm for spacecharge
+if(spacec==3) Spacecharge3Dmesh("Cathode"); #Cute trick to deal with image charges at the cathode
+if(spacec==3) Spacecharge3Dmesh("FieldFactor",-1);
+
+
+
+
+#############
+# RF GUN    #
+#############
+freqS = 2.856e9; #S band frequency in Hz
+wS=2*pi*freqS; #S-band angular frequency in rad/sec
+kS=wS/299792458; #S-band wave number in meter^-1
+scale = 51594212.5*0.9738*0.97;#Scaling of RF field 47537665.05908992;#/2.45 for initial tests. 
+#Turned OFF
+#map1D_TM("wcs", "z",0.000, "/home/ocamacho/FACET_model/FACET_model/gun_map.gdf", "z", "Ez", scale, gunPhase/deg, wS); #Using given 1D map for now
+
+
+
+
+############################
+# Bucking Solenoid         #
+############################
+#Turned OFF
+#map1D_B("wcs","z",magSolStart,"/home/ocamacho/FACET_model/FACET_model/soldata.gdf","z","Bz",magSolFac);#Using given 1D map for now
+
+
+
+
+############################
+# Compensation Solenoid    #
+############################
+solStart = solStart;
+#Turned OFF
+#map1D_B("wcs","z",solStart,"/home/ocamacho/FACET_model/FACET_model/soldata.gdf","z","Bz",solFac);#Using given 1D map for now
+
+
+
+
+############################
+# Initial Corrector Quad   #
+############################
+
+#####################
+#Quad 1: SQ10122    #
+#####################
+#Turned OFF
+#Skew quad!
+#quadrupole("wcs", 0, 0, quadzStart1, 1, -1, 0, 1, 1, 0, quadLength1, quadGrad1, pi/quadBore1); #Fringe field coefficient to be taken as pi/r_bore, as suggested by GPT manual
+
+#####################
+#Quad 2: CQ10122    #
+#####################
+#Turned OFF
+#Normal quad
+#quadrupole("wcs", "z", quadzStart2, quadLength2, quadGrad2, pi/quadBore2);
+
+
+
+
+########################
+# TW Booster Linac 1   #
+########################
+############################
+#IMPACT-t Style TWLinac    #
+############################
+#Turned OFF
+phi11 = theta01; #+ kS*d - pi/2;
+d = 0.104926; #Accelerating structure spatial period
+loaf1Scale = loaffac*loaf1Scale;
+cell1Scale = loaffac*cell1Scale;
+phi21 = theta01 + 1*pi/6; #3pi/2 phase shift
+phi31 = phi21 +pi/3; #-3pi/2 phase shift 
+
+#Initial cell
+#map1D_TM("wcs", "z", body1Start-d/2, "loaf_model_new_1cell_1d.gdf", "z", "Ez", cell1Scale, theta01 + 3*pi/2, wS);
+
+
+#Forward Traveling Wave
+#map1D_TM("wcs", "z", body1Start, "/home/ocamacho/FACET_model/FACET_model/loaf_model_new_56cell_1d.gdf", "z", "Ez", loaf1Scale, (phi11 + pi/3)/deg, wS);
+#Backwards Traveling Wave
+#map1D_TM("wcs", "z", body1Start, "/home/ocamacho/FACET_model/FACET_model/loaf_model_new_56cell_1d.gdf", "z", "Ez", loaf1Scale, (phi11 + pi)/deg, wS);
+
+
+
+#End Cell
+#map1D_TM("wcs", "z", body1Start + bodyLen, "/home/ocamacho/FACET_model/FACET_model/loaf_model_new_1cell_1d.gdf", "z", "Ez", cell1Scale, theta01, wS);
+
+
+
+
+########################
+# Post Linac Quads
+##########################
+
+###################
+# Quad QA10361    #
+###################
+#Turned OFF
+#quadrupole("wcs", "z", quadzStart3, quadLength3, quadGrad3, pi/quadBore3);
+
+###################
+# Quad QA10371    #
+###################
+#Turned OFF
+#quadrupole("wcs", "z", quadzStart4, quadLength4, quadGrad4, pi/quadBore4);
+
+
+
+
+######################
+# Booster Linac 2    #   
+######################
+#Turned OFF
+#Same length as Linac 1
+#Should boost up to 135MeV, fixed!
+#trwlinac("wcs","z",zstartLinac2 + 3.0429/2,0.1,50e6,linacFac2*4e+07,linacFac2*4e+07,128,0,linacPhi2/deg,1.79447772373049e10,linacLen);
+#trwlinac("wcs","z",zstartLinac2 + 3.0429/2,0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,12.0,0,linacPhi1/deg,1.79447772373049e10,linacLen);
+
+############################
+#IMPACT-t Style TWLinac    #
+############################
+phi12 = theta02; #+ kS*d - pi/2;
+lobffac = lobffac;
+lobfScale = lobffac*lobfScale; #0.62*lobfScale;
+d = 0.104926; #Accelerating structure spatial period
+phi22 = theta02 + 1*pi/6; #3pi/2 phase shift
+phi32 = phi22 + 1*pi/3; #-3pi/2 phase shift 
+#Initial cell
+map1D_TM("wcs", "z", body2Start-d/2, "/home/ocamacho/FACET_model/FACET_model/loaf_model_new_1cell_1d.gdf", "z", "Ez", cell2Scale, theta02 + pi, wS);
+
+#Turned OFF
+
+#Forward Traveling Wave
+#map1D_TM("wcs", "z", body2Start, "/home/ocamacho/FACET_model/FACET_model/loaf_model_new_56cell_1d.gdf", "z", "Ez", lobfScale, (phi12 + pi/3)/deg, wS);
+
+#Backward Traveling Wave
+#map1D_TM("wcs", "z", body2Start, "/home/ocamacho/FACET_model/FACET_model/loaf_model_new_56cell_1d.gdf", "z", "Ez", lobfScale, (phi12 + pi)/deg, wS);
+
+
+#End Cell
+#map1D_TM("wcs", "z", body2Start + bodyLen, "/home/ocamacho/FACET_model/FACET_model/loaf_model_new_1cell_1d.gdf", "z", "Ez", cell2Scale, theta02, wS);
+
+
+
+##############################
+# More normal quads below    #
+##############################
+
+###################
+# Quad QE10425   #
+###################
+#Turned OFF
+#quadrupole("wcs", "z", quadzStart5, quadLength5, quadGrad5, pi/quadBore5);
+
+
+
+###################
+# Quad QE10441   #
+###################
+#Turned OFF
+#quadrupole("wcs", "z", quadzStart6, quadLength6, quadGrad6, pi/quadBore6);
+
+
+
+
+###################
+# Quad QE10511    #
+###################
+#Turned OFF
+#quadrupole("wcs", "z", quadzStart7, quadLength7, quadGrad7, pi/quadBore7);
+
+
+
+
+###################
+# Quad QE10525    #
+###################
+#Turned OFF
+#quadrupole("wcs", "z", quadzStart8, quadLength8, quadGrad8, pi/quadBore8);
+
+
+
+
+#######################
+### RFTB TRANSFORM    #
+#######################
+
+avgG = 267.4 ;
+quadL = 0.108 ;
+
+
+q1=fac1*(-0.5759607037894037); # # updated value of q1
+
+q2=fac2*(0.8317565909806696); # # updated value of q2
+
+q3=fac1*(-1.6073374672931853); # # updated value of q3
+
+q4 = 0;
+
+
+
+Bp1 = avgG*0.511*q1*(1e6)/(c*quadL);
+Bp2 = avgG*0.511*q2*(1e6)/(c*quadL);
+Bp3 = avgG*0.511*q3*(1e6)/(c*quadL);
+Bp4 = avgG*0.511*q4*(1e6)/(c*quadL);
+
+
+quadrupole("wcs", 0, 0, quadzStartFL1 + d0, 1, -1, 0, 1, 1, 0, quadL, Bp1);   #, pi/quadBore8);
+quadrupole("wcs", 0, 0, quadzStartFL1 +d1, 1, -1, 0, 1, 1, 0, quadL, Bp2);   #, pi/quadBore8);
+quadrupole("wcs", 0, 0, quadzStartFL1 +d1 + d2, 1, -1, 0, 1, 1, 0, quadL, Bp3);   #, pi/quadBore8);
+#Normal quad to stretch out the beam in the x-direction
+#quadrupole("wcs", "z", quadzStartFL1 +d1 + d2 + d4, quadL, Bp4);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#########################
+# Time Domain Output    #                 
+#########################
+accuracy(acc);
+if(nscreens>1) dz_step = (zend-zstart)/nscreens;
+if(nscreens>1)   tout(zstart/c,zend/c,dz_step/c);
+#(Physical viewing screens may be included in tout by force)
+#Need to use tout and not snapshot for avgfEz, avgfBz, etc. to work
+#if(nscreens>1)   tout(zScreen1/c);
+#if(nscreens>1)   tout(zScreen2/c);
+#if(nscreens>1)   tout(zScreen3/c);
+if(nscreens == 1) tout(zend/c);
+#Agreed upon checkpoints
+#tout(0.1335/c);
+#tout(4.305/c);
+#tout(9.002/c);
+
+#################################
+# Detection screen snapshots    #
+#################################
+#if(nscreens ==0) snapshot(zScreen1/c);
+#if(nscreens ==0) snapshot(zScreen2/c);
+#if(nscreens ==0) snapshot(zScreen3/c);
+
+##########################
+# Optimization Screen    #
+##########################
+if(optMode == 1) screen( "wcs","I", zend ) ;

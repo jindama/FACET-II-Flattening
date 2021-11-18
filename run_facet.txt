@@ -1,0 +1,2 @@
+mr -v -o facet_output.gdf simu_scan.mr  gpt -j 16 simu.in 
+gdfa -o avgs_facet_output.gdf facet_output.gdf time avgr avgz stdx stdy stdz stdBx stdBy nemirrms nemixrms nemiyrms nemizrms avgG stdG avgBz avgBx numpar avgfBz avgfEz

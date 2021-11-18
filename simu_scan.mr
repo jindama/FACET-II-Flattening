@@ -1,0 +1,246 @@
+#################
+# SIMULATION    #
+################
+acc 5	# Accuracy, 6 is great, 7 is publication quality
+spacec 1 #spacecharge off/3dmesh/2dmesh/BH with cathode mesh
+nscreens  25 # number of screens to record
+#Physical collector screen (PR10241) at 0.942m
+zScreen1 0.942
+#Physical collector screen (PR10465) at 9.1047m
+zScreen2 9.1047
+#Physical collector screen (PR10471) at 9.7802m
+zScreen3 9.7802
+#Injection at 16.5m
+zstart  9.25 #Beginning of simulation
+zend 13.0 #End of simulation
+optMode 0 # Optimization mode, when GPT .sol files are being used to find optima
+loadin  1 #If true, we load in an external beam distribution 
+
+
+
+
+
+###########
+# BEAM    #
+###########
+nps 7e3 #total number of particles
+Qtot 2.0# Total charge (nC)
+tlen 2.0e-12 # #Beam length in s
+beamDiam 0.0045 #0.0045 diameter, 2.25mm radius, uniform cylinder for toy model
+themit 3.27e-6 # Not used for toy model. #Using sig_x*sig_x', MTE = 0.414eV#Cathode emittance formula -> (lrad/2)*sqrt(2*|qe|*Eo/(3*me*c^2))
+
+
+
+##################
+# Gun Phases     #
+##################
+gunPhase -78 #, 78 # ~-78 for minimal energy spread in round beam mode
+
+
+######################
+# Solenoid Params    #  
+######################
+magSolStart -0.20 #Shifted for peak at cathode
+magSolFac 0.2457#0.2457 #0.2457 #for initial tests of magnetized beam
+
+solStart 0.0 # 0.49308 #Peak at 20cm
+solFac 0.2457 ##Scale factor on solenoid field 0.26279037686 for round beam #0.2457 originally, 0.275424657 so far for magnetized case
+eps 1.0 #0.66292;
+
+#############################
+## Corrector Quad Params    #
+#############################
+
+#Turn on one or the other! No overlap
+
+#####################
+#Quad 1: SQ10122    #
+#####################
+quadzStart1 0.361 
+quadLength1 0.210 #Effective quad length
+quadBore1 0.0254 #bore radius
+quadGrad1 0.00714 #Nominal gradient in T/m
+
+#####################
+#Quad 2: CQ10122    #
+#####################
+quadzStart2 0.361
+quadLength2 0.210 #Effective quad length
+quadBore2 0.0254 #bore radius
+quadGrad2 0.00714 #Nominal gradient in T/m
+
+
+
+
+#############################
+# Booster Linac 1 Params    #
+#############################
+phi11 0
+phi21 0
+theta01 187.65 #190.6 #190.7 #196 #193.7 189 , 203
+cell1Scale 26013438.73067529
+loaf1Scale 26013438.73067529 #
+loaffac 1.055 #1.0304918 #
+linacLen 3.0429 #Length of booster linac
+body1Start  1.110862
+bodyLen 2.937928 #LOAF body length
+zstartLinac1 2.59105
+#~65 MeV boost
+#Peak at 175
+#Optimal dE 160
+#Peak: 198
+d 0.104926 #Accelerating structure spatial period
+
+
+
+
+
+
+########################
+# Post Linac Quads
+##########################
+
+###################
+# Quad QA10361    #
+###################
+
+quadzStart3 4.310389 #m
+quadLength3 0.108 #m
+quadBore3 0.016 #m
+quadGrad3 2.01482 #2.515 #T/m
+
+###################
+# Quad QA10371    #
+###################
+
+quadzStart4 4.638765 #m
+quadLength4 0.108 #m
+quadBore4 0.016 #m
+quadGrad4 -2.12772 #-2.6277 #T/m
+
+
+
+
+
+#############################
+# Booster Linac 2 Params    #
+#############################
+theta02 198 #198 #207.3 #204.6 #
+#199
+lobffac 0.886 #
+lobfScale 36780527.3869102
+cell2Scale 31841617.97938928
+#Same length as Linac 1
+#Should boost up to 135MeV, fixed by bending magnets!
+body2Start 4.886847 
+
+
+
+
+
+##############################
+# More normal quads below    #
+##############################
+
+###################
+# Quad QE10425   #
+###################
+
+quadzStart5 7.9495043 #m
+quadLength5 0.108 #m
+quadBore5 0.016 #m
+quadGrad5 5.69501 #T/m
+
+
+
+
+###################
+# Quad QE10441   #
+###################
+
+quadzStart6 8.3510173 #m
+quadLength6 0.108 #m
+quadBore6 0.016 #m
+quadGrad6 -5.64211 #T/m
+
+
+
+
+###################
+# Quad QE10511    #
+###################
+
+quadzStart7 11.039235 #m
+quadLength7 0.108 #m
+quadBore7 0.016 #m
+quadGrad7 -4.66906 #T/m
+
+
+
+
+###################
+# Quad QE10525    #
+###################
+quadzStart8 11.4292015 #m
+quadLength8 0.108 #
+quadBore8 0.016 #m
+quadGrad8 4.71711 #T/m
+
+
+
+
+###################
+# Quad FL1        #
+###################
+quadzStartFL1  9.911493527388908 # 
+quadLength1 0.108 #
+quadBore1 0.016 #m
+quadGrad1 4.71711 #T/m
+
+
+
+
+###################
+# Quad FL2        #
+###################
+#quadzStartFL2 8.515701436637647 #updated value of quadzStartFL1
+quadLengthFL2 0.108 #m
+quadBoreFL2 0.016 #m
+quadGradFL2 -18.619616725099608 #T/m
+
+
+
+
+###################
+# Quad FL3        #
+###################
+#quadzStartFL3 13.0 #m
+quadLengthFL3 0.108 #m
+quadBoreFL3 0.016 #m
+quadGradFL3 -18.619616725099608 #T/m
+
+
+
+
+###################
+# Quad FL4       #
+###################
+quadzStartFL4 13.3 #m
+quadLengthFL4 0.108 #m
+quadBoreFL4 0.016 #m
+quadGradFL4 4.71711 #T/m
+
+#1.08199089e+00,  3.48334431e-04, -2.09838886e-04 all over 2 works alright (~14.9)
+#-0.245383  ,  0.31686594,  0.1343687
+#Best so far: facs 2.97614214, 1.17119156, 0.46974683 with initial values -0.33297274,  0.3672592 , -0.20817029
+
+
+fac1 -1 # updated value of fac1
+fac2 -1 # updated value of fac2
+fac3 -1 # updated value of fac3
+
+
+
+d0 0.045 # updated value of d0
+d1 1.55 # updated value of d1
+d2 1.65 # updated value of d2
