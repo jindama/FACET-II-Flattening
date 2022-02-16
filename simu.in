@@ -4,10 +4,10 @@
 #Use this to load in external distributions rather than creating them in GPT
 if(loadin == 1) m = me ;
 if(loadin == 1) q = qe;
-if(loadin == 1) setfile("beam","C:\Users\ocamacho\Downloads\FACET - Matched GPT Model\FACET - Matched GPT Model\RTFB_screen.gdf");
-if(loadin == 1) pp("Distribution loaded");
+if(loadin == 1) setfile("beam","C:\Users\ocamacho\FACET_Model\emit_test.gdf");
+if(loadin == 1) pp("External istribution loaded");
 if(loadin == 1) setreduce("beam", nps);
-if(loadin == 1) pp("Distribution randomly sampled to reduce to ", nps, " macroparticles.");
+if(loadin == 1) pp("External distribution randomly sampled to reduce to ", nps, " macroparticles.");
 
 
 
@@ -16,20 +16,39 @@ if(loadin == 1) pp("Distribution randomly sampled to reduce to ", nps, " macropa
 # Load in bitmap    ##########
 ##############################
 #Try loading in first
-if(loadin == 2) setfile("beam","bunchData.gdf");
+if(loadin == 2) setfile("beam","C:\Users\ocamacho\FACET_Model\bunchData.gdf");
 if(loadin == 2) pp("Distribution loaded");
 if(loadin == 2) setreduce("beam", nps);
 if(loadin == 2) pp("Distribution randomly sampled to reduce to ", nps, " macroparticles.");
 
 #Now fix the transverse distribution
-res = 775/(beamDiam);
-if(loadin == 2) setxydistbmp("beam","UV_BW.BMP", res, res);
+res = 215053.763; #Microns per pixel (776/beamDiam);
+if(loadin == 2) setxydistbmp("beam","C:\Users\ocamacho\FACET_Model\newCathodeSpot_1.BMP", res, res);
 #if(loadin == 2) rmax("wcs", "I", 0.00225, 1e-7);
-if(loadin == 2) pp("Transverse distribution fixed by UV_BW.BMP");
-G = 1.0000000001;
+if(loadin == 2) pp("Transverse distribution fixed by newCathodeSpot.BMP");
+if(loadin == 2) settransform("wcs", -0.20*dx, -0.450*dy, 0, 1, 0, 0, 0, 1, 0, "beam");
+G = 1 + 8.1e-7; #Corresponds to 4.14eV
 GBz = sqrt(G^2 - 1);
+tlenRMS = tlenFWHM/2.35482005;
+#if(loadin == 2) settdist("beam", "g", 0, tlenRMS, 2.5, 2.5);
+#if (loadin == 2) setGdist("beam", "g", G, G - 1, 0, 1);
+
+#######################
+# Energy distribution #
+#######################
+#Elaser = 4.73;	#4.66# laser energy in eV
+#Wfunc = 4.66;	# Work function in eV
+#Efmax=240;
+#dW = sqrt(abs(qe)^3*Efmax*abs(sin(phiL/deg))/(4*pi*eps0))/abs(qe); #in eV
+#Eo=Elaser-Wfunc+dW;	# Energy including Schottky Effect
+#G=1+|qe|*Eo/(me*c^2);	# Corresponding Gamma
+#GB=sqrt(G^2-1);	# Corresponding Gamma*Beta
+#avg_GBz = 0.006750824506; # 
+std_GBz = 9.721327351e-6; # Standard deviation in GBz
+#setGBzdist("beam","g",avg_GBz, std_GBz,1,1);
+
 #if(loadin == 2) setphidist("beam","u",0,2*pi);
-#if(loadin == 2) setGBzdist("beam","u",GBz,1.0e-20); #For now, beam is generated at rest with zero initial energy spread
+#if(loadin == 2) setGBzdist("beam","g",0, GBz,3, 3); #For now, beam is generated at rest with zero initial energy spread
 #if(loadin == 2) setGBthetadist("beam","u",pi/4,pi/2); #Uniform phase space distribution for now
 #if(loadin == 2) setGBphidist("beam","u",0,2*pi);
 
@@ -67,7 +86,7 @@ if(loadin == 0) setGBphidist("beam","u",0,2*pi);
 #######################
 # Longitudinal Dist   #
 #######################
-beamLen = c*tlen;
+beamLen = c*tlenRMS;
 if(loadin == 0) setzdist("beam", "u", beamLen/2, beamLen);
 
 #################################
@@ -84,7 +103,7 @@ if(loadin == 0) settdist("beam","u",0,t0); #Flat profile
 ##################
 setrmacrodist("beam", "u", 2.817940e-13, 0); #Arbitrarily set to classical electron radius
 
-if(spacec==1) Spacecharge3Dmesh("Cathode"); #Include image charges behind the cathode
+if(spacec==1) Spacecharge3Dmesh("Cathode", "SolverAcc", meshacc); #Include image charges behind the cathode
 if(spacec==2) setcharge2Dcircle("beam",-Qtot*1e-9) ;
 if(spacec==2) Spacecharge2Dcircle(); #Never used this but included for completeness
 if(spacec==3) setrmacrodist("beam","u", 2.82e-15,0);# Classical electron radius
@@ -101,8 +120,8 @@ if(spacec==3) Spacecharge3Dmesh("FieldFactor",-1);
 freqS = 2.856e9; #S band frequency in Hz
 wS=2*pi*freqS; #S-band angular frequency in rad/sec
 kS=wS/299792458; #S-band wave number in meter^-1
-scale = 51594212.5*0.9738*0.97;#Scaling of RF field 47537665.05908992;#/2.45 for initial tests. 
-map1D_TM("wcs", "z",0.000, "gun_map.gdf", "z", "Ez", scale, gunPhase/deg, wS); #Using given 1D map for now
+scale = 1.0*48.74e6 ;#51594212.5*0.9738*0.97;#Scaling of RF field 47537665.05908992;#/2.45 for initial tests. 
+map1D_TM("wcs", "z", -1.5e-4, "C:\Users\ocamacho\FACET_Model\smoothGun.gdf", "z", "Ez", scale, (gunPhase)/deg, wS); #Using given 1D map for now
 
 
 
@@ -110,7 +129,7 @@ map1D_TM("wcs", "z",0.000, "gun_map.gdf", "z", "Ez", scale, gunPhase/deg, wS); #
 ############################
 # Bucking Solenoid         #
 ############################
-map1D_B("wcs","z",magSolStart,"C:\Users\ocamacho\Downloads\FACET - Matched GPT Model\FACET - Matched GPT Model\soldata.gdf","z","Bz",magSolFac);#Using given 1D map for now
+map1D_B("wcs","z",magSolStart,"C:\Users\ocamacho\FACET_Model\smooth_sol_new.gdf","z","Bz",magSolFac);#Using given 1D map for now
 
 
 
@@ -119,8 +138,8 @@ map1D_B("wcs","z",magSolStart,"C:\Users\ocamacho\Downloads\FACET - Matched GPT M
 # Compensation Solenoid    #
 ############################
 solStart = solStart;
-solFac = solFac*solPert;
-map1D_B("wcs","z",solStart,"C:\Users\ocamacho\Downloads\FACET - Matched GPT Model\FACET - Matched GPT Model\soldata.gdf","z","Bz",solFac);#Using given 1D map for now
+solFac = solFac*magSolFac;
+map1D_B("wcs","z",solStart,"C:\Users\ocamacho\FACET_Model\smooth_sol_new.gdf","z","Bz",solFac);#Using given 1D map for now
 
 
 
@@ -152,47 +171,43 @@ map1D_B("wcs","z",solStart,"C:\Users\ocamacho\Downloads\FACET - Matched GPT Mode
 ############################
 phi11 = theta01; #+ kS*d - pi/2;
 d = 0.104926; #Accelerating structure spatial period
-loaf1Scale = loaffac*loaf1Scale;
-cell1Scale = loaffac*cell1Scale;
-phi21 = theta01 + 1*pi/6; #3pi/2 phase shift
-phi31 = phi21 +pi/3; #-3pi/2 phase shift 
+loaf1Scale = (0.978)*(1.003)*loaffac*loaf1Scale;
+cell1Scale = 2*(0.978)*(1.003)*loaffac*loaf1Scale;
+
+
+#trwlinac("wcs","z",2.49105,0.15,50e6,4e+07,5.76239124e-01*4e+07,12,theta01,2.32129,1.79447772373049e10,3.0429) ;
+
+
+
+#trwlinac("wcs","z",2.49105,0.1,50e6,4e+07, 5*3.49170325e-02*4e+07,12,theta01,2.32129,(2)*1.79447772373049e10,3.0429) ;
+
+
+
+#trwlinac("wcs","z",2.49105,0.1,50e6,4e+07,7.19361681e-18*4e+07,12,theta01,2.32129,(2/3)*1.79447772373049e10,3.0429) ;
+
+
+
+#trwlinac("wcs","z",2.49105,0.1,50e6,4e+07,2.26321047e-01*4e+07,12,theta01 + pi,2.32129,(2/4)*1.79447772373049e10,3.0429) ;
+
+
+
+#trwlinac("wcs","z",2.49105,0.1,50e6,4e+07,3.23179511e-17*4e+07,12,theta01,2.32129,(2/5)*1.79447772373049e10,3.0429) ;
+
+
+
+#trwlinac("wcs","z",2.49105,0.1,50e6,4e+07,6.93284770e-02*4e+07,12,theta01 + pi,2.32129,(2/6)*1.79447772373049e10,3.0429) ;
+
+
 #Initial cell
-#map1D_TM("wcs", "z", body1Start-d/2, "loaf_model_new_1cell_1d.gdf", "z", "Ez", cell1Scale, theta01 + 3*pi/2, wS);
+map1D_TM("wcs", "z",body1Start - d/2,  "C:\Users\ocamacho\FACET_Model\loaf_model_new_1cell_1d.gdf", "z", "Ez", cell1Scale, theta01, wS);
 
 #Forward Traveling Wave
 #TURNED ON FOR NOW
-map1D_TM("wcs", "z", body1Start, "C:\Users\ocamacho\Downloads\FACET - Matched GPT Model\FACET - Matched GPT Model\loaf_model_new_56cell_1d.gdf", "z", "Ez", loaf1Scale, (phi11 + pi/3)/deg, wS);
-map1D_TM("wcs", "z", body1Start, "C:\Users\ocamacho\Downloads\FACET - Matched GPT Model\FACET - Matched GPT Model\loaf_model_new_56cell_1d.gdf", "z", "Ez", loaf1Scale, (phi11 + pi)/deg, wS);
-
-#Backwards Traveling Wave
-#map1D_TM("wcs", "z", body1Start, "C:\Users\ocamacho\Downloads\FACET - Matched GPT Model\FACET - Matched GPT Model\loaf_model_new_56cell_1d.gdf", "z", "Ez", loaf1Scale, phi11/deg, wS);
-#map1D_TM("wcs", "z", body1Start, "C:\Users\ocamacho\Downloads\FACET - Matched GPT Model\FACET - Matched GPT Model\loaf_model_new_56cell_1d.gdf", "z", "Ez", loaf1Scale, phi31/deg, wS);
+map1D_TM("wcs", "z", body1Start, "C:\Users\ocamacho\FACET_Model\loaf_model_new_56cell_1d.gdf", "z", "Ez", loaf1Scale, (theta01 + pi/6)/deg, wS);
+map1D_TM("wcs", "z", body1Start, "C:\Users\ocamacho\FACET_Model\loaf_model_new_56cell_1d.gdf", "z", "Ez", loaf1Scale, (theta01 + pi/2)/deg, wS);
 
 #End Cell
-#map1D_TM("wcs", "z", body1Start + bodyLen, "C:\Users\ocamacho\Downloads\FACET - Matched GPT Model\FACET - Matched GPT Model\loaf_model_new_1cell_1d.gdf", "z", "Ez", cell1Scale, theta01, wS);
-
-#######################
-# Defunct TW Linac    #
-#######################
-#entranceStart = 1.058398;
-#entranceLen = 2*0.052464 ;
-#linacScale = 26013438.73067529;
-#theta0start = 295.91;
-#gammaEntrance = 12;
-#trwlinac("wcs","z",entranceStart, 0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,gammaEntrance, 0,theta0start/deg + pi,wS, entranceLen);
-#trwlinac("wcs","z",entranceStart + 1*entranceLen, 0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,gammaEntrance, 0,theta0start/deg + (1)*pi,wS, entranceLen);
-#trwlinac("wcs","z",entranceStart + 2*entranceLen, 0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,gammaEntrance, 0,theta0start/deg + 1*(1)*pi,wS, entranceLen);
-#trwlinac("wcs","z",entranceStart + 3*entranceLen, 0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,gammaEntrance, 0,theta0start/deg + 1*pi,wS, entranceLen);
-#trwlinac("wcs","z",entranceStart + 4*entranceLen, 0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,gammaEntrance, 0,theta0start/deg + 1*pi,wS, entranceLen);
-#trwlinac("wcs","z",entranceStart + 5*entranceLen, 0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,gammaEntrance, 0,theta0start/deg + 1*pi, wS, entranceLen);
-#trwlinac("wcs","z",entranceStart + 6*entranceLen, 0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,gammaEntrance, 0,theta0start/deg  + 1*pi,wS, entranceLen);
-#trwlinac("wcs","z",entranceStart + 7*entranceLen, 0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,gammaEntrance, 0,theta0start/deg + 1*pi,wS, entranceLen);
-#trwlinac("wcs","z",entranceStart + 8*entranceLen, 0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,gammaEntrance, 0,theta0start/deg + 1*pi,wS, entranceLen);
-#trwlinac("wcs","z",entranceStart + 9*entranceLen, 0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,gammaEntrance, 0,theta0start/deg + 1*pi,wS, entranceLen);
-#trwlinac("wcs","z",entranceStart + 10*entranceLen, 0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,gammaEntrance, 0,theta0start/deg +1*pi,wS, entranceLen);
-#trwlinac("wcs","z",entranceStart + 11*entranceLen, 0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,gammaEntrance, 0,theta0start/deg + 1*pi,wS, entranceLen);
-#trwlinac("wcs","z",entranceStart + 12*entranceLen, 0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,gammaEntrance, 0,theta0start/deg + 1*pi,wS, entranceLen);
-#trwlinac("wcs","z",entranceStart + 13*entranceLen, 0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,gammaEntrance, 0,theta0start/deg - 1*(1)*pi,wS, entranceLen);
+map1D_TM("wcs", "z", body1Start + bodyLen, "C:\Users\ocamacho\FACET_Model\loaf_model_new_1cell_1d.gdf", "z", "Ez", cell1Scale, theta01 , wS);
 
 
 
@@ -220,32 +235,29 @@ map1D_TM("wcs", "z", body1Start, "C:\Users\ocamacho\Downloads\FACET - Matched GP
 ######################
 #Same length as Linac 1
 #Should boost up to 135MeV, fixed!
-#trwlinac("wcs","z",zstartLinac2 + 3.0429/2,0.1,50e6,linacFac2*4e+07,linacFac2*4e+07,128,0,linacPhi2/deg,1.79447772373049e10,linacLen);
-#trwlinac("wcs","z",zstartLinac2 + 3.0429/2,0.1,50e6,linacFac1*4e+07,linacFac1*4e+07,12.0,0,linacPhi1/deg,1.79447772373049e10,linacLen);
 
 ############################
 #IMPACT-t Style TWLinac    #
 ############################
 phi12 = theta02; #+ kS*d - pi/2;
 lobffac = lobffac;
-lobfScale = lobffac*lobfScale; #0.62*lobfScale;
+lobfScale = (131.6/146)*(135/145)*(1.0484198)*lobfScale;
 d = 0.104926; #Accelerating structure spatial period
 phi22 = theta02 + 1*pi/6; #3pi/2 phase shift
 phi32 = phi22 + 1*pi/3; #-3pi/2 phase shift 
+cell2Scale = (131.6/146)*(135/145)*(1.0484198)*cell2Scale;
 #Initial cell
-map1D_TM("wcs", "z", body2Start-d/2, "C:\Users\ocamacho\Downloads\FACET - Matched GPT Model\FACET - Matched GPT Model\loaf_model_new_1cell_1d.gdf", "z", "Ez", cell2Scale, theta02 + pi, wS);
+map1D_TM("wcs", "z", body2Start - d/2, "C:\Users\ocamacho\FACET_Model\loaf_model_new_1cell_1d.gdf", "z", "Ez", cell2Scale, theta02, wS);
 
 #Forward Traveling Wave
 #TURNED ON FOR NOW
-map1D_TM("wcs", "z", body2Start, "C:\Users\ocamacho\Downloads\FACET - Matched GPT Model\FACET - Matched GPT Model\loaf_model_new_56cell_1d.gdf", "z", "Ez", lobfScale, (phi12 + pi/3)/deg, wS);
-map1D_TM("wcs", "z", body2Start, "C:\Users\ocamacho\Downloads\FACET - Matched GPT Model\FACET - Matched GPT Model\loaf_model_new_56cell_1d.gdf", "z", "Ez", lobfScale, (phi12 + pi)/deg, wS);
-
+map1D_TM("wcs", "z", body2Start, "C:\Users\ocamacho\FACET_Model\loaf_model_new_56cell_1d.gdf", "z", "Ez", lobfScale, (theta02 + pi/6)/deg, wS);
 #Backwards Traveling Wave
-#map1D_TM("wcs", "z", body2Start, "C:\Users\ocamacho\Downloads\FACET - Matched GPT Model\FACET - Matched GPT Model\loaf_model_new_56cell_1d.gdf", "z", "Ez", lobfScale, phi12/deg, wS);
-#map1D_TM("wcs", "z", body2Start, "C:\Users\ocamacho\Downloads\FACET - Matched GPT Model\FACET - Matched GPT Model\loaf_model_new_56cell_1d.gdf", "z", "Ez", lobfScale, phi32/deg, wS);
+map1D_TM("wcs", "z", body2Start, "C:\Users\ocamacho\FACET_Model\loaf_model_new_56cell_1d.gdf", "z", "Ez", lobfScale, (theta02 + pi/2)/deg, wS);
 
 #End Cell
-map1D_TM("wcs", "z", body2Start + bodyLen, "C:\Users\ocamacho\Downloads\FACET - Matched GPT Model\FACET - Matched GPT Model\loaf_model_new_1cell_1d.gdf", "z", "Ez", cell2Scale, theta02, wS);
+map1D_TM("wcs", "z", body2Start + bodyLen, "C:\Users\ocamacho\FACET_Model\loaf_model_new_1cell_1d.gdf", "z", "Ez", cell2Scale, theta02, wS);
+
 
 
 
@@ -305,11 +317,11 @@ Bp1 = avgG*0.511*q1*(1e6)/(c*quadL);
 Bp2 = avgG*0.511*q2*(1e6)/(c*quadL);
 Bp3 = avgG*0.511*q3*(1e6)/(c*quadL);
 
-quadrupole("wcs", 0, 0, quadzStartFL1 + quadL/2.0, 1, -1, 0, 1, 1, 0, quadL, Bp1, pi/quadBore8);
+#quadrupole("wcs", 0, 0, quadzStartFL1 + quadL/2.0, 1, -1, 0, 1, 1, 0, quadL, Bp1, pi/quadBore8);
 
-quadrupole("wcs", 0, 0,(quadzStartFL1 + quadL/2) + (quadL/2 + d1 + quadL/2), 1, -1, 0, 1, 1, 0, quadL, Bp2, pi/quadBore8);
+#quadrupole("wcs", 0, 0,(quadzStartFL1 + quadL/2) + (quadL/2 + d1 + quadL/2), 1, -1, 0, 1, 1, 0, quadL, Bp2, pi/quadBore8);
 
-quadrupole("wcs", 0, 0, (quadzStartFL1 + quadL/2) + (quadL/2 + d1 + quadL/2) + (quadL/2 + d2 + quadL/2), 1, -1, 0, 1, 1, 0, quadL, Bp3, pi/quadBore8);
+#quadrupole("wcs", 0, 0, (quadzStartFL1 + quadL/2) + (quadL/2 + d1 + quadL/2) + (quadL/2 + d2 + quadL/2), 1, -1, 0, 1, 1, 0, quadL, Bp3, pi/quadBore8);
  
 
 
@@ -354,8 +366,18 @@ if(nscreens == 1) tout(zend/c);
 ##########################
 # Optimization Screen    #
 ##########################
-if(optMode == 1) screen( "wcs","I", zend ) ;
+if(optMode == 1) screen( "wcs","I", 0.13 ) ;
 
 
 
-#writefloorplan("FACET2_floorplan.gdf");
+#writefloorplan("C:\Users\ocamacho\FACET_Model\FACET2_floorplan.gdf");
+
+
+
+
+
+
+
+
+
+

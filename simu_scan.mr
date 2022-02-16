@@ -1,46 +1,61 @@
-#################
+##################
 # SIMULATION    #
 ################
-acc 7	# Accuracy, 6 is great, 7 is publication quality
+acc 4 # Accuracy, 6 is great, 7 is publication quality
 spacec 1 #spacecharge off/3dmesh/2dmesh/BH with cathode mesh
-nscreens  150 # number of screens to record
+meshacc 0.01 #accuracy for 3dmesh computation
+nscreens 650 # number of screens to record
 #Physical collector screen (PR10241) at 0.942m
-zScreen1 0.942
+zScreen1 0.942s
 #Physical collector screen (PR10465) at 9.1047m
-zScreen2 9.1047
+zScreen2 9.1047h
 #Physical collector screen (PR10471) at 9.7802m
 zScreen3 9.7802
 #Injection at 16.5m
-zstart 9.5 # Beginning of simulation
-zend 11.15  # End of simulation
+zstart 0.0 # Beginning of simulation
+zend 4.35 # End of simulation
 optMode 0 # Optimization mode, when GPT .sol files are being used to find optima
-loadin 1 #If 1, we load in an external beam distributions. If 2, we load in a bitmap.
+loadin 2 #If 1, we load in an external beam distributions. If 2, we load in a bitmap.
+
 
 ###########
-# BEAM    #
-###########
-nps 7.5e4 #total number of particles
+# Beam   #
+#########
+nps 1.75e4
 Qtot 2.0# Total charge (nC)
-tlen 2.0e-12 # #Beam length in s
+tlenFWHM 4.0e-12 # #Beam length in s
 beamDiam 0.0045 #0.0045 diameter, 2.25mm radius, uniform cylinder for toy model
 themit 3.27e-6 # Not used for toy model. #Using sig_x*sig_x', MTE = 0.414eV#Cathode emittance formula -> (lrad/2)*sqrt(2*|qe|*Eo/(3*me*c^2))
 
+#################
+# Alignment    #
+###############
+dx 1.2880e-4 #0.00026169
+dy 2.682e-4 #0.00039191
+
+#Best so far:
+#dx 2.54e-4 #2.5249e-4 #2.5238e-4
+#dy -3.75e-4 #-3.669e-4 #-3.6713e-4 #1.93e-4
+
+
+
+
 ##################
-# Gun Phases     #
-##################
-gunPhase -78 #~-78 for minimal energy spread in round beam mode
+# Gun Phases    #
+################
+gunPhase -76 #-40 #193
 
 
 ######################
 # Solenoid Params    #  
 ######################
 magSolStart -0.20 #Shifted for peak at cathode
-magSolFac 0.29 #0.2457 #for initial tests of magnetized beam
+magSolFac 0.2011 #0.28 #0.2457 #for initial tests of magnetized beam
 
-solStart 0.00 # 0.49308 #Peak at 20cm
-solPert 0.78
-solFac 0.29#(0.873300773) #0.2457 ##Scale factor on solenoid field 0.26279037686 for round beam #0.2457 originally, 0.275424657 so far for magnetized case
-eps 4.2 #0.66292;
+solStart 0.005 #0.005 # 0.49308 #Peak at 20cm
+solPert 1.0
+solFac 1.127#1.01563399620611495 #0.930087 #0.745353605364 
+eps 1.0  #0.66292; 
 
 #############################
 ## Corrector Quad Params    #
@@ -67,18 +82,18 @@ quadGrad2 0.00714 #Nominal gradient in T/m
 
 
 
-#############################
+############################# 
 # Booster Linac 1 Params    #
 #############################
 phi11 0
 phi21 0
-theta01 187.65 #187.65 #187.65 #187.65 #190.6 #190.7 #196 #193.7 189 , 203
-cell1Scale 26013438.73067529
-loaf1Scale 26013438.73067529 #
+theta01 189.6 #175#208 starting from  t = 0, phiGun = -40 #22 DEGREES BEHIND CREST
+cell1Scale 26013438.#73067529
+loaf1Scale 26013438.#73067529 #
 loaffac 1.055 #1.0304918 #
 linacLen 3.0429 #Length of booster linac
 body1Start  1.110862
-bodyLen 2.937928 #LOAF body l ength
+bodyLen 2.937928 #LOAF body l ength 
 zstartLinac1 2.59105
 #~65 MeV boost
 #Peak at 175
@@ -119,8 +134,8 @@ quadGrad4 -2.12772 #-2.6277 #T/m
 
 #############################
 # Booster Linac 2 Params    #
-#############################
-theta02 198 #198 #198 #207.3 #204.6 #
+############################
+theta02 190.5 #28.5 #198 #198 #207.3 #204.6 # 6.5 DEGREES OFF CREST
 #199
 lobffac 0.886 #
 lobfScale 36780527.3869102
@@ -128,8 +143,6 @@ cell2Scale 31841617.97938928
 #Same length as Linac 1 
 #Should boost up to 135MeV, fixed by bending magnets!
 body2Start 4.886847 
-
-
 
 
 
